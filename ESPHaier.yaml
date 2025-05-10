@@ -1,0 +1,169 @@
+substitutions:
+  name: "esphaier"
+  friendly_name: "ESPHaier"
+  room: "Office"
+  device_description: "ESPHome Haier AC control unit"
+  project_name: "ESPHaier V1"
+  project_version: "v0.1.0"
+  wifi_fast_connect: "false"
+  ipv6_enable:
+    "false"
+    #mac: "-3961dc"
+  add_mac_suffix: "true"
+
+esphome:
+  name: "${name}${mac}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: "${add_mac_suffix}"
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: ESP32S3
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  hardware_uart: USB_CDC
+  level: DEBUG
+
+# Enable Home Assistant API
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  fast_connect: "${wifi_fast_connect}"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap: {}
+
+captive_portal:
+
+dashboard_import:
+  package_import_url:
+
+web_server:
+  port: 80
+
+#esp32_improv:
+#  authorizer: none
+
+uart:
+  - id: ac_port
+    tx_pin: GPIO21
+    rx_pin: GPIO20
+    baud_rate: 9600
+
+sensor:
+  - platform: uptime
+    type: seconds
+    name: Uptime Sensor
+    update_interval: 2s
+
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 2s
+
+climate:
+  - platform: haier
+    id: haier_ac
+    protocol: hon
+    name: Haier AC
+    uart_id: ac_port
+    wifi_signal: true
+    display: true
+    visual:
+      min_temperature: 16 °C
+      max_temperature: 30 °C
+      temperature_step: 1 °C
+    supported_modes:
+      - "OFF"
+      - HEAT_COOL
+      - COOL
+      - HEAT
+      - DRY
+      - FAN_ONLY
+    supported_swing_modes:
+      - "OFF"
+      - VERTICAL
+      - HORIZONTAL
+      - BOTH
+    supported_presets:
+      - AWAY
+      - BOOST
+      - SLEEP
+
+light:
+  - platform: esp32_rmt_led_strip
+    chipset: WS2812
+    id: status_led
+    pin: 38
+    num_leds: 1
+    rmt_channel: 0
+    rgb_order: RGB
+    name: "RGB LED"
+    restore_mode: ALWAYS_OFF
+    internal: True
+    default_transition_length: 0.0s
+
+    # Declare status sensors
+binary_sensor:
+  - platform: status
+    name: "Status"
+    id: esp_status
+
+globals:
+  - id: blink_state
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+interval:
+  # Red blink on boot (temporary until WiFi attempts begin)
+  - interval: 500ms
+    then:
+      - if:
+          condition:
+            lambda: "return !id(esp_status).state && !WiFi.isConnected();"
+          then:
+            - lambda: |-
+                id(blink_state) = !id(blink_state);
+            - logger.log: "Test log!"
+            - light.control:
+                id: status_led
+                red: !lambda "return id(blink_state) ? 1.0 : 0.0;"
+                green: 0.0
+                blue: 0.0
+                brightness: 0.3
+
+  # Blue blinking while trying to connect
+  - interval: 500ms
+    then:
+      - if:
+          condition:
+            lambda: "return !id(esp_status).state && WiFi.isConnected();"
+          then:
+            - lambda: |-
+                id(blink_state) = !id(blink_state);
+            - light.control:
+                id: status_led
+                red: 0.0
+                green: 0.0
+                blue: !lambda "return id(blink_state) ? 1.0 : 0.0;"
+                brightness: 0.3
+
+  # Solid green when everything is OK
+  - interval: 2s
+    then:
+      - if:
+          condition:
+            lambda: "return id(esp_status).state && WiFi.isConnected();"
+          then:
+            - light.turn_on:
+                id: status_led
+                red: 0.0
+                green: 1.0
+                blue: 0.0
+                brightness: 0.3
