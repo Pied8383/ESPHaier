@@ -42,7 +42,7 @@ wifi:
 captive_portal:
 
 dashboard_import:
-  package_import_url: github://Pied8383/ESPHaier/blob/main/ESPHaier.yaml
+  package_import_url: github://Pied8383/ESPHaier/esp-configs/ESPHaier.yaml
 
 web_server:
   port: 80
