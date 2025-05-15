@@ -3,7 +3,7 @@ substitutions:
   friendly_name: "ESPHaier"
   room: "Office"
   device_description: "ESPHome Haier AC control unit"
-  project_name: Peter.ESPHaier V1"
+  project_name: "Peter.ESPHaier V1"
   project_version: "v0.1.0"
   wifi_fast_connect: "false"
   ipv6_enable: "false"
