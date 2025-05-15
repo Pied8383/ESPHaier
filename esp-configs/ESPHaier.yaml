@@ -6,9 +6,8 @@ substitutions:
   project_name: "ESPHaier V1"
   project_version: "v0.1.0"
   wifi_fast_connect: "false"
-  ipv6_enable:
-    "false"
-    #mac: "-3961dc"
+  ipv6_enable: "false"
+  #mac: "-3961dc"
   add_mac_suffix: "true"
 
 esphome:
@@ -47,8 +46,8 @@ dashboard_import:
 web_server:
   port: 80
 
-#esp32_improv:
-#  authorizer: none
+esp32_improv:
+  authorizer: none
 
 uart:
   - id: ac_port
