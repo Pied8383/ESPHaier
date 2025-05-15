@@ -19,6 +19,8 @@ esphome:
   project:
     name: "${project_name}"
     version: "${project_version}"
+
+    
 esp32:
   board: esp32-s3-devkitc-1
   variant: ESP32S3
