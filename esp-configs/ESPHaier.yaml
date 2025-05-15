@@ -1,7 +1,7 @@
 substitutions:
   name: "esphaier"
   friendly_name: "ESPHaier"
-  room: "Office"
+  room: ""
   device_description: "ESPHome Haier AC control unit"
   project_name: "Peter.ESPHaier V1"
   project_version: "v0.1.1"
@@ -9,6 +9,7 @@ substitutions:
   ipv6_enable: "false"
   mac: ""
   add_mac_suffix: "true"
+  import_full_config: "true"
 
 esphome:
   name: "${name}${mac}"
@@ -28,7 +29,6 @@ esp32:
 
 # Enable logging
 logger:
-  hardware_uart: USB_CDC
   level: DEBUG
 
 # Enable Home Assistant API
@@ -47,7 +47,7 @@ captive_portal:
 
 dashboard_import:
   package_import_url: github://Pied8383/ESPHaier/esp-configs/ESPHaier.yaml
-  import_full_config: true
+  import_full_config: ${import_full_config}
 
 web_server:
   port: 80
