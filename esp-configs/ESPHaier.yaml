@@ -4,7 +4,7 @@ substitutions:
   room: "Office"
   device_description: "ESPHome Haier AC control unit"
   project_name: "Peter.ESPHaier V1"
-  project_version: "v0.1.0"
+  project_version: "v0.1.1"
   wifi_fast_connect: "false"
   ipv6_enable: "false"
   mac: ""
@@ -14,7 +14,11 @@ esphome:
   name: "${name}${mac}"
   friendly_name: "${friendly_name}"
   name_add_mac_suffix: "${add_mac_suffix}"
-
+  comment: "${device_description}"
+  area: "${room}"
+  project:
+    name: "${project_name}"
+    version: "${project_version}"
 esp32:
   board: esp32-s3-devkitc-1
   variant: ESP32S3
