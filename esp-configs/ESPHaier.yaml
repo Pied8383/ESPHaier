@@ -112,6 +112,7 @@ light:
     restore_mode: ALWAYS_OFF
     internal: True
     default_transition_length: 0.0s
+    brightness: 0.3
 
     # Declare status sensors
 binary_sensor:
@@ -119,56 +120,20 @@ binary_sensor:
     name: "Status"
     id: esp_status
 
-globals:
-  - id: blink_state
-    type: bool
-    restore_value: no
-    initial_value: "false"
-
 interval:
-  # Red blink on boot (temporary until WiFi attempts begin)
-  - interval: 500ms
+  - interval: 1s
     then:
-      - if:
-          condition:
-            lambda: "return !id(esp_status).state && !WiFi.isConnected();"
-          then:
-            - lambda: |-
-                id(blink_state) = !id(blink_state);
-            - logger.log: "Test log!"
-            - light.control:
-                id: status_led
-                red: !lambda "return id(blink_state) ? 1.0 : 0.0;"
-                green: 0.0
-                blue: 0.0
-                brightness: 0.3
-
-  # Blue blinking while trying to connect
-  - interval: 500ms
-    then:
-      - if:
-          condition:
-            lambda: "return !id(esp_status).state && WiFi.isConnected();"
-          then:
-            - lambda: |-
-                id(blink_state) = !id(blink_state);
-            - light.control:
-                id: status_led
-                red: 0.0
-                green: 0.0
-                blue: !lambda "return id(blink_state) ? 1.0 : 0.0;"
-                brightness: 0.3
-
-  # Solid green when everything is OK
-  - interval: 2s
-    then:
-      - if:
-          condition:
-            lambda: "return id(esp_status).state && WiFi.isConnected();"
-          then:
-            - light.turn_on:
-                id: status_led
-                red: 0.0
-                green: 1.0
-                blue: 0.0
-                brightness: 0.3
+      - lambda: |-
+          if (!WiFi.is_connected()) {
+            // RED: No WiFi
+            id(status_led).turn_on();
+            id(status_led).make_call().set_rgb(1.0, 0.0, 0.0).perform();
+          } else if (WiFi.is_connected() && !id(api).is_connected()) {
+            // YELLOW: WiFi ok, API disconnected
+            id(status_led).turn_on();
+            id(status_led).make_call().set_rgb(1.0, 1.0, 0.0).perform();
+          } else {
+            // GREEN: All good
+            id(status_led).turn_on();
+            id(status_led).make_call().set_rgb(0.0, 1.0, 0.0).perform();
+          }
