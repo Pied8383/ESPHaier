@@ -112,7 +112,7 @@ light:
     restore_mode: ALWAYS_OFF
     internal: True
     default_transition_length: 0.0s
-    brightness: 0.3
+
 
     # Declare status sensors
 binary_sensor:
