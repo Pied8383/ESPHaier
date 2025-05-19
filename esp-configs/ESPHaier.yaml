@@ -4,7 +4,7 @@ substitutions:
   room: ""
   device_description: "ESPHome Haier AC control unit"
   project_name: "Peter.ESPHaier V1"
-  project_version: "v0.1.1"
+  project_version: "v0.1.2"
   wifi_fast_connect: "false"
   ipv6_enable: "false"
 
