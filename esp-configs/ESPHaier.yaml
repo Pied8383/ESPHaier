@@ -85,7 +85,7 @@ esp32_improv:
   authorizer: none
 
 uart:
-  - id: ac_port
+  - id: haier_uart
     tx_pin: GPIO43
     rx_pin: GPIO44
     baud_rate: 9600
