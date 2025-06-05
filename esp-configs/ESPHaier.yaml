@@ -8,6 +8,7 @@ substitutions:
   wifi_fast_connect: "false"
   ipv6_enable: "false"
 
+  brightness: "20%"
   add_mac_suffix: "true"
   import_full_config: "false"
 
@@ -20,6 +21,14 @@ esphome:
   project:
     name: "${project_name}"
     version: "${project_version}"
+  on_boot:
+    then:
+      - light.turn_on:
+          id: status_led
+          brightness: "${brightness}"
+          red: 100%
+          green: 0%
+          blue: 0%
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -33,7 +42,30 @@ logger:
 
 # Enable Home Assistant API
 api:
-  id: api
+  services:
+    - service: turn_on
+      then:
+        - climate.haier.power_on: haier_ac
+    - service: turn_off
+      then:
+        - climate.haier.power_off: haier_ac
+
+  on_client_connected:
+    - light.turn_on:
+        id: status_led
+        brightness: "${brightness}"
+        red: 0%
+        green: 100%
+        blue: 0%
+
+  on_client_disconnected:
+    - light.turn_on:
+        id: status_led
+        brightness: "${brightness}"
+        red: 0%
+        green: 0%
+        blue: 100%
+
 ota:
   - platform: esphome
 
@@ -71,7 +103,6 @@ light:
     internal: True
     default_transition_length: 0.0s
 
-
 climate:
   - platform: haier
     id: haier_ac
@@ -86,14 +117,14 @@ climate:
         target_temperature: 1
         current_temperature: 0.5
     supported_modes:
-      - 'OFF'
+      - "OFF"
       - HEAT_COOL
       - COOL
       - HEAT
       - DRY
       - FAN_ONLY
     supported_swing_modes:
-      - 'OFF'
+      - "OFF"
       - VERTICAL
       - HORIZONTAL
       - BOTH
@@ -117,7 +148,7 @@ climate:
             data:
               title: "Haier hOn Climate: alarm activated"
             data_template:
-              message: "Code: {{ alarm_code }}, message: \"{{ alarm_message }}\""
+              message: 'Code: {{ alarm_code }}, message: "{{ alarm_message }}"'
             variables:
               alarm_message: !lambda "return message;"
               alarm_code: !lambda "return code;"
@@ -291,7 +322,7 @@ sensor:
       name: Haier hOn Climate outdoor temperature
     power:
       name: Haier hOn Climate Power
-  
+
   - platform: uptime
     type: seconds
     name: Uptime Sensor
@@ -316,7 +347,7 @@ binary_sensor:
       name: Haier hOn Climate Indoor Fan Status
     outdoor_fan_status:
       name: Haier hOn Climate Outdoor Fan Status
-  
+
   - platform: status
     name: "Status"
     id: esp_status
